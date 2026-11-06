@@ -35,7 +35,7 @@ namespace Events
                     e.Event.Area,
                     e.Event.EventId,
                     e.Event.Message,
-                    e.Event.Timestamp?.ToString() ?? "----");
+                    e.Event.SourceTimestamp);
         }
     }
 }

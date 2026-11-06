@@ -2,45 +2,40 @@
 
 namespace Events.Messages
 {
+    using System.Globalization;
     using Sinumerik.Advanced;
 
+    /// <summary>
+    /// Provides the messages of custom OEM events. For all other events, it returns null, so that
+    /// the messages of the other registered providers or the default messages are used.
+    /// </summary>
     public class OemEventMessageProvider : NcuEventMessageProvider
     {
-        #region ---------- Private readonly fields ----------
-
-        private readonly INcuEventMessageProvider fallbackProvider;
-
-        #endregion
-
         #region ---------- Public constructors ----------
 
         public OemEventMessageProvider()
-            : this(Default)
+            : base()
         {
         }
 
-        public OemEventMessageProvider(INcuEventMessageProvider fallbackProvider)
-            : base()
+        public OemEventMessageProvider(CultureInfo culture)
+            : base(culture)
         {
-            this.fallbackProvider = fallbackProvider ?? Default;
         }
 
         #endregion
 
-        #region ---------- Public methods ----------
+        #region ---------- Protected methods ----------
 
-        public override string GetMessage(long eventId, params object[] arguments)
+        protected override string GetMessageCore(NcuEventId eventId, params object[] arguments)
         {
-            var message = this.fallbackProvider.GetMessage(eventId, arguments);
+            if (eventId.Value == 220000)
+                return "Your OEM message without arguments.";
 
-            if (message == null) {
-                if (eventId == 220000)
-                    message = "Your OEM message without arguments.";
-                else if (eventId == 220001)
-                    message = string.Format(this.Culture, "Your OEM message with three arguemnts: {0}, {1} and {2}", arguments);
-            }
+            if (eventId.Value == 220001)
+                return string.Format(this.Culture, "Your OEM message with three arguments: {0}, {1} and {2}", arguments);
 
-            return message;
+            return null;
         }
 
         #endregion

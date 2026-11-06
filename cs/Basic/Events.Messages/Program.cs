@@ -12,20 +12,22 @@ namespace Events.Messages
         /// </summary>
         public static void Main()
         {
-            // Setup a custom OEM message provider for system and non-system events.
-            NcuEvent.MessageProvider = new OemEventMessageProvider();
+            // Register a custom OEM message provider for the current UI culture (see
+            // NcuEventMessage.Culture). Events for which no registered provider returns a
+            // message use the default messages.
+            var oemProvider = new OemEventMessageProvider();
+            NcuEventMessage.RegisterProvider(oemProvider);
 
-            // To reset the used message provider to NcuEventMessageProvider.Default:
-            ////NcuEvent.MessageProvider = null;
+            // To remove the custom message provider again:
+            ////NcuEventMessage.UnregisterProvider(oemProvider);
 
-            // In case you want to provide system and non-system messages using a resource file:
-            ////NcuEvent.MessageProvider = NcuEventMessageProvider.Load(@".\Messages.de-DE.txt");
-            // or using the OEM message provider:
-            ////var fallback = NcuEventMessageProvider.Load(@".\Messages.de-DE.txt");
-            ////NcuEvent.MessageProvider = new OemEventMessageProvider(fallback);
+            // In case you want to provide system and non-system messages using a resource file
+            // (the culture is determined from the file name if possible, otherwise the current
+            // UI culture is used):
+            ////NcuEventMessage.RegisterProvider(NcuEventMessageProvider.Load(@".\Messages.de-DE.txt"));
 
             // To prepare a "template" resource file you can use:
-            ////NcuEventMessageProvider.Default.Save(@".\Messages.en-US.txt");
+            ////((NcuEventMessageProvider)NcuEventMessage.Provider).Save(@".\Messages.en-US.txt");
 
             // The following setup connects to a Sinumerik SolutionLine (Sl)
             // Just replace "sl" with "pl" to connect to a Sinumerik PowerLine instead.
@@ -50,7 +52,7 @@ namespace Events.Messages
                     e.Event.Area,
                     e.Event.EventId,
                     e.Event.Message ?? "[no message available]",
-                    e.Event.Timestamp?.ToString() ?? "----");
+                    e.Event.SourceTimestamp);
         }
     }
 }
